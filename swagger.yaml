@@ -1,0 +1,131 @@
+tags:
+  - name: user
+    description: User documentation
+  - name: upload
+    description: Upload documentation
+
+paths:
+  ## User tag
+  # [POST] user
+  /user/register:
+    post:
+      tags:
+        - user
+      summary: User register
+      parameters:
+        - name: body
+          in: body
+          description: User data
+          required: true
+          schema:
+            $ref: '#/definitions/user'
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
+
+  # [PUT] resend verify email
+  /user/resend:
+    put:
+      tags:
+        - user
+      summary: User resend verify email
+      parameters:
+        - name: account
+          in: query
+          description: Email
+          required: true
+          type: string
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
+
+  ## File tag
+  # [POST] File
+  /upload/single:
+    post:
+      tags:
+        - upload
+      consumes:
+        - multipart/form-data
+      summary: Upload single file
+      parameters:
+        - name: file
+          in: formData
+          description: File data
+          required: true
+          type: file
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
+
+  /upload/multiple:
+    post:
+      tags:
+        - upload
+      consumes:
+        - multipart/form-data
+      summary: Upload multiple files
+      parameters:
+        - name: files
+          in: formData
+          description: Multiple files data
+          required: true
+          type: array
+          items:
+            type: file
+          # collectionFormat: multi
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
+  ##static
+  #[GET] file
+  /static/{path}:
+    get:
+      tags:
+        - static
+      # consumes:
+      #   - multipart/form-data
+      summary: Get file
+      parameters:
+        - name: path
+          in: path
+          description: Response
+          required: true
+      produces:
+        - image/png
+        - image/gif
+        - image/jpeg
+      responses:
+        200:
+          description: 'OK'
+          schema:
+            type: file
+        500:
+          description: 'Server Error'
+
+# definitions
+definitions:
+  user:
+    type: object
+    required:
+      - email
+      - password
+    properties:
+      email:
+        type: string
+        description: User email
+      password:
+        type: string
+        description: User password
+
+schemes:
+  - https
+  - http

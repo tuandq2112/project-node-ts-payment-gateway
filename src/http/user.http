@@ -1,0 +1,18 @@
+# baseURL
+@baseURL = http://localhost:2112/user
+
+###
+# User Register
+POST {{ baseURL }}/register
+Content-Type: application/json
+
+{
+    "email": "example1@email.com",
+    "password": "passwor123"
+}
+
+###
+# User resend
+PUT {{ baseURL }}/resend?account=example@email.com
+Content-Type: application/json
+
