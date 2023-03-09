@@ -51,4 +51,10 @@ export class UserException extends HttpException {
 
     throw new UserException(200, response);
   }
+
+  public static invalidActiveCode() {
+    const response = new ResponseDTO(this.ERROR_CODE + 9, 'UserService: invalid active code', null);
+
+    throw new UserException(200, response);
+  }
 }

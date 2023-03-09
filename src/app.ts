@@ -56,15 +56,11 @@ class App {
       set('debug', true);
     }
 
-    connect(dbConnection.url, dbConnection.options)
-      .then(() => {
-        console.log('Connected');
-      })
-      .catch(err => {
-        console.log(err);
+    connect(dbConnection.url, dbConnection.options).catch(err => {
+      console.log(err);
 
-        console.log('Conntect fail!');
-      });
+      console.log('Connected fail!');
+    });
   }
 
   private initializeMiddlewares() {

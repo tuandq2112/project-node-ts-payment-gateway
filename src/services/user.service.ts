@@ -17,7 +17,9 @@ class UserService {
     if (findUser) {
       UserException.userExisted();
     }
+
     const hashedPassword = await hash(registerDTO.password, 10);
+
     const randomString = generateRandomString(20);
     const sendResult = await this.sendVerifyEmail(registerDTO.email, randomString);
     if (sendResult) {
@@ -81,9 +83,12 @@ class UserService {
     return newUser;
   }
 
-  private sendVerifyEmail(account: string, randomString: string): Promise<boolean> {
+  private async sendVerifyEmail(account: string, randomString: string): Promise<boolean> {
+    const findUser = await this.user.findOne({ email: account });
+    if (!findUser) {
+      UserException.userNotFound();
+    }
     const verifyUrl = `${FRONT_END_URL}?account=${account}&verifyCode=${randomString}`;
-
     return new Promise((resolve, reject) => {
       this.emailService
         .sendVerifyEmail(account, verifyUrl)
@@ -96,16 +101,21 @@ class UserService {
     });
   }
 
-  public formatDate() {
-    const date = new Date();
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-
-    return `${day}${month}${year} ${hours}:${minutes}:${seconds}`;
+  public async activeAccount(account: string, activeCode: string): Promise<boolean> {
+    const findUser = await this.user.findOne({ email: account });
+    if (!findUser) {
+      UserException.userNotFound();
+    }
+    if (findUser.status != UserStatus.PENDING) {
+      UserException.accountVerified();
+    }
+    const activeTime = new Date();
+    if (activeCode == findUser.activeCode) {
+      await this.user.updateOne({ _id: findUser._id }, { activeTime, status: UserStatus.ACTIVE });
+      return true;
+    } else {
+      UserException.invalidActiveCode();
+    }
   }
 }
 export default UserService;

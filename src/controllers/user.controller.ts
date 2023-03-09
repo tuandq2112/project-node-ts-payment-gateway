@@ -26,6 +26,18 @@ class UserController extends BaseResponseController {
       next(error);
     }
   };
+
+  public activeAccount = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const account = req.query.account ? req.query.account.toString() : '';
+      const activeCode = req.query.activeCode ? req.query.activeCode.toString() : '';
+
+      const result: boolean = await this.userService.activeAccount(account, activeCode);
+      this.response(res, result);
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default UserController;
