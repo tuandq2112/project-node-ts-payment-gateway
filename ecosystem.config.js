@@ -27,8 +27,7 @@ module.exports = {
     },
     {
       name: 'dev', // pm2 start App name
-      script: 'ts-node', // ts-node
-      args: '-r tsconfig-paths/register --transpile-only src/server.ts', // ts-node args
+      script: 'dist/server.js',
       exec_mode: 'cluster', // 'cluster' or 'fork'
       instance_var: 'INSTANCE_ID', // instance variable
       instances: 2, // pm2 instance count

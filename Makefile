@@ -1,5 +1,5 @@
 # app name should be overridden.
-# ex) production-stage: make build APP_NAME=<APP_NAME>
+# ex) production-stage: make build APP_NAME=gateway
 # ex) development-stage: make build-dev APP_NAME=<APP_NAME>
 
 APP_NAME = typescript-express
