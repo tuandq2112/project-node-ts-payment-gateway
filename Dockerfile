@@ -1,24 +1,8 @@
-# Common build stage
-FROM node:14.14.0-alpine3.12 as common-build-stage
+FROM node:16.14.0
+# Setting working directory. All the path will be relative to WORKDIR
+WORKDIR /usr/src/app
 
-COPY . ./app
+# Running the app
+RUN npm install pm2 -g
 
-WORKDIR /app
-
-RUN npm install
-
-EXPOSE 3000
-
-# Development build stage
-FROM common-build-stage as development-build-stage
-
-ENV NODE_ENV development
-
-CMD ["npm", "run", "deploy:dev"]
-
-# Production build stage
-FROM common-build-stage as production-build-stage
-
-ENV NODE_ENV production
-
-CMD ["npm", "run", "deploy:prod"]
+CMD ["pm2-runtime", "start", "npm", "--", "start" ]
