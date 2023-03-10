@@ -31,7 +31,6 @@ class UserController extends BaseResponseController {
     try {
       const account = req.query.account ? req.query.account.toString() : '';
       const activeCode = req.query.activeCode ? req.query.activeCode.toString() : '';
-
       const result: boolean = await this.userService.activeAccount(account, activeCode);
       this.response(res, result);
     } catch (error) {

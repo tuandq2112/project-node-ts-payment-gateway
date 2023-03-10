@@ -111,6 +111,29 @@ paths:
         500:
           description: 'Server Error'
 
+   # [PUT] resend verify email
+  /user/active:
+    put:
+      tags:
+        - user
+      summary: User active account
+      parameters:
+        - name: account
+          in: query
+          description: Email
+          required: true
+          type: string
+        - name: activeCode
+          in: query
+          description: Active code
+          required: true
+          type: string
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
+
 # definitions
 definitions:
   user:
