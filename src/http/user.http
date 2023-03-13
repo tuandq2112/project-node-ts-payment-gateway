@@ -1,18 +1,29 @@
 # baseURL
 @baseURL = http://localhost:2112/user
-
+@email = doquoctua1n311@gmail.com
+@pwd = doquoctuan311
 ###
 # User Register
 POST {{ baseURL }}/register
 Content-Type: application/json
 
 {
-    "email": "example1@email.com",
-    "password": "passwor123"
+    "email": "{{email}}",
+    "password": "{{pwd}}"
 }
 
 ###
 # User resend
-PUT {{ baseURL }}/resend?account=example@email.com
+PUT {{ baseURL }}/resend?account={{email}}
 Content-Type: application/json
 
+###
+# User login
+POST {{ baseURL }}/login
+Content-Type: application/json
+
+{
+    "email": "{{email}}",
+    "password": "{{pwd}}",
+    "twofaCode": "647600"
+}

@@ -23,5 +23,6 @@ export const {
   EMAIL_USER,
   EMAIL_PASSWORD,
   FRONT_END_URL,
+  TWO_FACTOR_AUTHENTICATION_APP_NAME,
 } = process.env;
 export const ABSOLUTE_PATH = './files/public/';

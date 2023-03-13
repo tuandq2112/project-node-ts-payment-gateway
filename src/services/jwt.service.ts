@@ -1,9 +1,8 @@
 import { DURATION, KEY_PAIR } from '@/config';
-import { User } from '@/interfaces/user.interface';
 import jsonwebtoken, { JwtPayload } from 'jsonwebtoken';
 const { PRIVATE_KEY, PUBLIC_KEY } = KEY_PAIR;
 class JwtService {
-  public static generateToken(user: User): string {
+  public static generateToken(user: any): string {
     const token = jsonwebtoken.sign(user, PRIVATE_KEY, { algorithm: 'RS256', expiresIn: Number(DURATION) });
     return token;
   }

@@ -43,6 +43,65 @@ paths:
         500:
           description: 'Server Error'
 
+  # [PUT] active user
+  /user/active:
+    put:
+      tags:
+        - user
+      summary: User active account
+      parameters:
+        - name: account
+          in: query
+          description: Email
+          required: true
+          type: string
+        - name: activeCode
+          in: query
+          description: Active code
+          required: true
+          type: string
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
+
+  # [PUT] generate qr for two factor authentication
+  /user/generate-qr:
+    put:
+      tags:
+        - user
+      summary: User generate qr for scan
+      parameters:
+        - name: account
+          in: query
+          description: Email
+          required: true
+          type: string
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
+
+  # [POST] Login with auth code
+  /user/login:
+    put:
+      tags:
+        - user
+      summary: Login with auth code
+      parameters:
+        - name: body
+          in: body
+          description: Login data
+          required: true
+          schema:
+            $ref: '#/definitions/login'
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
   ## File tag
   # [POST] File
   /upload/single:
@@ -111,28 +170,7 @@ paths:
         500:
           description: 'Server Error'
 
-   # [PUT] resend verify email
-  /user/active:
-    put:
-      tags:
-        - user
-      summary: User active account
-      parameters:
-        - name: account
-          in: query
-          description: Email
-          required: true
-          type: string
-        - name: activeCode
-          in: query
-          description: Active code
-          required: true
-          type: string
-      responses:
-        200:
-          description: 'OK'
-        500:
-          description: 'Server Error'
+    # [PUT] resend verify email
 
 # definitions
 definitions:
@@ -148,6 +186,21 @@ definitions:
       password:
         type: string
         description: User password
+  login:
+    type: object
+    required:
+      - email
+      - password
+    properties:
+      email:
+        type: string
+        description: User email
+      password:
+        type: string
+        description: User password
+      twofaCode:
+        type: string
+        description: Two factor authentication
 
 schemes:
   - https

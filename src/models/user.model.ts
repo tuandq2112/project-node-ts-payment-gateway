@@ -1,4 +1,5 @@
-import { UserStatus } from '@/enums/UserStatus';
+import { LoginProcessEnum } from '@/enums/LoginProcessEnum';
+import { UserStatusEnum } from '@/enums/UserStatus';
 import { User } from '@/interfaces/user.interface';
 import { Document, model, Schema } from 'mongoose';
 
@@ -15,12 +16,22 @@ const userSchema: Schema = new Schema(
     },
     status: {
       type: String,
-      enum: UserStatus,
+      enum: UserStatusEnum,
       require: true,
-      default: UserStatus.PENDING,
+      default: UserStatusEnum.PENDING,
     },
     activeCode: { type: String },
     lastTimeGenerateActiveCode: { type: Date },
+    loginProcess: {
+      type: String,
+      enum: LoginProcessEnum,
+      require: true,
+      default: LoginProcessEnum.NOTHING,
+    },
+    twoFactorAuthenticationCode: { type: String },
+    security: {
+      isEnable2Fa: { type: Boolean, default: false },
+    },
   },
   { timestamps: true },
 );

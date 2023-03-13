@@ -1,5 +1,5 @@
-export enum UserStatus {
-  PENDING,
-  ACTIVE,
-  INACTIVE,
+export enum UserStatusEnum {
+  PENDING = 'PENDING',
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
 }
