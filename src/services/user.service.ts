@@ -140,7 +140,7 @@ class UserService {
     }
 
     if (findUser?.security?.isEnable2Fa) {
-      UserException.enabled2FA();
+      // UserException.enabled2FA();
     }
 
     return this.authenticationService.getTwoFactorAuthenticationCode(findUser.email);

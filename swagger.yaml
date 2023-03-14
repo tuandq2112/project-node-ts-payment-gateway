@@ -74,6 +74,8 @@ paths:
       summary: User generate qr for scan
       produces:
         - image/png
+        - image/gif
+        - image/jpeg
       parameters:
         - name: account
           in: query
