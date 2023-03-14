@@ -10,5 +10,7 @@ export interface User {
   lastTimeGenerateActiveCode: Date;
   loginProcess: LoginProcessEnum;
   twoFactorAuthenticationCode: string;
-  security: Object;
+  security: {
+    isEnable2Fa: boolean;
+  };
 }

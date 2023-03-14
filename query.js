@@ -49,5 +49,5 @@ async function queryAsync() {
       .reduce((a, b) => a + b, 0),
   );
 }
-queryFizen();
-// queryAsync();
+// queryFizen();
+queryAsync();

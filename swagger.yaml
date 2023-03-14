@@ -72,6 +72,8 @@ paths:
       tags:
         - user
       summary: User generate qr for scan
+      produces:
+        - image/png
       parameters:
         - name: account
           in: query

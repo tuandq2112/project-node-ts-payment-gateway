@@ -57,4 +57,10 @@ export class UserException extends HttpException {
 
     throw new UserException(200, response);
   }
+
+  public static enabled2FA() {
+    const response = new ResponseDTO(this.ERROR_CODE + 10, 'UserService: enabled two factor authentication', null);
+
+    throw new UserException(200, response);
+  }
 }
