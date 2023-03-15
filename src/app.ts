@@ -67,7 +67,7 @@ class App {
     this.app.use(morgan(LOG_FORMAT, { stream }));
     this.app.use(cors({ origin: ORIGIN, credentials: JSON.parse(CREDENTIALS) }));
     this.app.use(hpp());
-    this.app.use(helmet());
+    // this.app.use(helmet());
     this.app.use(compression());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
@@ -89,6 +89,7 @@ class App {
           version: '1.0.0',
           description: 'API docs',
         },
+        servers: ['http://localhost:8083'],
       },
       apis: ['swagger.yaml'],
     };
