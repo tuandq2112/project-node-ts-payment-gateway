@@ -3,7 +3,8 @@ tags:
     description: User documentation
   - name: upload
     description: Upload documentation
-
+security:
+  - bearerAuth: []
 paths:
   ## User tag
   # [POST] user
@@ -65,32 +66,9 @@ paths:
           description: 'OK'
         500:
           description: 'Server Error'
-
-  # [PUT] generate qr for two factor authentication
-  /user/generate-qr:
-    put:
-      tags:
-        - user
-      summary: User generate qr for scan
-      produces:
-        - image/png
-        - image/gif
-        - image/jpeg
-      parameters:
-        - name: account
-          in: query
-          description: Email
-          required: true
-          type: string
-      responses:
-        200:
-          description: 'OK'
-        500:
-          description: 'Server Error'
-
   # [POST] Login with auth code
   /user/login:
-    put:
+    post:
       tags:
         - user
       summary: Login with auth code
@@ -106,6 +84,35 @@ paths:
           description: 'OK'
         500:
           description: 'Server Error'
+  # [PUT] generate qr for two factor authentication
+  /user/generate-qr:
+    put:
+      tags:
+        - user
+      summary: User generate qr for scan
+      parameters:
+        - name: Authorization
+          in: header
+          description: an authorization header
+          required: true
+          type: string
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
+  # [PUT] generate qr for two factor authentication
+  /user/enable-2fa:
+    put:
+      tags:
+        - user
+      summary: Enable two factor authentication
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
+
   ## File tag
   # [POST] File
   /upload/single:
@@ -209,3 +216,10 @@ definitions:
 schemes:
   - https
   - http
+
+securityDefinitions:
+  Authorization:
+    type: apiKey
+    name: Authorization
+    in: header
+    scheme: bearer

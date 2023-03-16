@@ -1,5 +1,6 @@
 import { LoginUserDTO } from '@/dtos/user/login.user.dto';
 import { RegisterUserDTO } from '@/dtos/user/register.user.dto';
+import { RequestWithUser } from '@/interfaces/auth.interface';
 import { User } from '@/interfaces/user.interface';
 import userService from '@/services/user.service';
 import { NextFunction, Request, Response } from 'express';
@@ -39,14 +40,20 @@ class UserController extends BaseResponseController {
     }
   };
 
-  public generateQR = async (req: Request, res: Response, next: NextFunction) => {
+  public generateQR = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
-      const account = req.query.account ? req.query.account.toString() : '';
-      const { otpauthUrl, base32 } = await this.userService.generateTwoFactorAuthenticationCode(account);
-
-      await this.userService.updateSecretBase32(account, base32);
+      const account = req.user.email;
+      const otpauthUrl = await this.userService.getOptAuthUrl(account);
       this.userService.responseQRcode(otpauthUrl, res);
-      return true;
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public enable2Fa = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    try {
+      const result = await this.userService.enableTwoFactorAuthentication(req.user);
+      this.response(res, result);
     } catch (error) {
       next(error);
     }
@@ -55,10 +62,8 @@ class UserController extends BaseResponseController {
   public login = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const body: LoginUserDTO = req.body;
-      const { token, object } = await this.userService.login(body);
-      const result = { token, ...object._doc };
-      delete result.password;
-      delete result.twoFactorAuthenticationCode;
+      const { token, verifyOpCode, jwtData } = await this.userService.login(body);
+      const result = { token, merchant: jwtData, verifyOpCode };
 
       this.response(res, result);
     } catch (error) {

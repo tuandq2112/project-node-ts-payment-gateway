@@ -16,4 +16,9 @@ export class AuthException extends HttpException {
     const response = new ResponseDTO(401, 'AuthMiddleware: User not active', null);
     return new AuthException(401, response);
   }
+
+  public static twoFaNotWork() {
+    const response = new ResponseDTO(401, 'AuthMiddleware: 2fa disabled', null);
+    return new AuthException(401, response);
+  }
 }

@@ -7,7 +7,6 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
-import helmet from 'helmet';
 import hpp from 'hpp';
 import { connect, set } from 'mongoose';
 import morgan from 'morgan';
@@ -25,7 +24,6 @@ class App {
     this.app = express();
     this.env = NODE_ENV || 'development';
     this.port = PORT || 3000;
-    console.log(PORT);
 
     try {
       this.connectToDatabase();

@@ -1,8 +1,7 @@
 import { FRONT_END_URL } from '@/config';
 import { LoginUserDTO } from '@/dtos/user/login.user.dto';
 import { RegisterUserDTO } from '@/dtos/user/register.user.dto';
-import { LoginProcessEnum } from '@/enums/LoginProcessEnum';
-import { UserStatusEnum } from '@/enums/UserStatus';
+import { CurrentStep } from '@/enums/LoginProcessEnum';
 import { UserException } from '@/exceptions/UserException';
 import { User } from '@/interfaces/user.interface';
 import userModel from '@/models/user.model';
@@ -46,7 +45,7 @@ class UserService {
     if (!findUser) {
       UserException.userNotFound();
     }
-    if (findUser.status != UserStatusEnum.PENDING) {
+    if (findUser.currentStep != CurrentStep.REGISTERED) {
       UserException.accountVerified();
     }
 
@@ -71,33 +70,26 @@ class UserService {
     if (!findUser) {
       UserException.userNotFound();
     }
+
     const userPassword = findUser.password;
-    const userStatus = findUser.status;
 
     const isVerify = await compare(loginDTO.password, userPassword);
 
     if (!isVerify) {
       UserException.passwordNotMatch();
     }
-    if (userStatus == UserStatusEnum.PENDING) {
-      UserException.accountNotVerify();
-    }
 
-    if (userStatus == UserStatusEnum.INACTIVE) {
-      UserException.inactiveAccount();
-    }
-    let res = '';
+    const jwtData = findUser.toJSON();
+
+    const res = JwtService.generateToken(jwtData);
 
     const verifyOpCode = this.authenticationService.verifyTwoFactorAuthenticationCode(loginDTO.twofaCode, findUser.twoFactorAuthenticationCode);
 
     if (verifyOpCode) {
-      res = JwtService.generateToken({ email: findUser.email, status: findUser.status });
-      await this.user.updateOne({ _id: findUser._id }, { loginProcess: LoginProcessEnum.LOGIN, security: { isEnable2Fa: true } });
-    } else {
-      await this.user.updateOne({ _id: findUser._id }, { loginProcess: LoginProcessEnum.WAIT });
+      await this.user.updateOne({ _id: findUser._id }, { verifyOpCode });
     }
 
-    return { token: res, object: findUser };
+    return { token: res, jwtData, verifyOpCode };
   }
 
   private async sendVerifyEmail(account: string, randomString: string): Promise<boolean> {
@@ -119,19 +111,24 @@ class UserService {
     if (!findUser) {
       UserException.userNotFound();
     }
-    if (findUser.status != UserStatusEnum.PENDING) {
+    if (findUser.currentStep != CurrentStep.REGISTERED) {
       UserException.accountVerified();
     }
     const activeTime = new Date();
+    const { otpauthUrl, base32 } = this.authenticationService.getTwoFactorAuthenticationCode(findUser.email);
+
     if (activeCode == findUser.activeCode) {
-      await this.user.updateOne({ _id: findUser._id }, { activeTime, status: UserStatusEnum.ACTIVE });
+      await this.user.updateOne(
+        { _id: findUser._id },
+        { activeTime, currentStep: CurrentStep.EMAIL_VERIFIED, otpauthUrl, twoFactorAuthenticationCode: base32 },
+      );
       return true;
     } else {
       UserException.invalidActiveCode();
     }
   }
 
-  public generateTwoFactorAuthenticationCode = async (account: string) => {
+  public getOptAuthUrl = async (account: string) => {
     const findUser = await this.user.findOne({ email: account });
 
     if (!findUser) {
@@ -139,19 +136,19 @@ class UserService {
       return;
     }
 
-    if (findUser?.security?.isEnable2Fa) {
-      // UserException.enabled2FA();
-    }
-
-    return this.authenticationService.getTwoFactorAuthenticationCode(findUser.email);
+    return findUser.otpauthUrl;
   };
 
-  public updateSecretBase32 = async (account: string, base32: string) => {
-    const findUser = await this.user.findOne({ email: account });
-
-    return await this.user.findByIdAndUpdate(findUser._id, {
-      twoFactorAuthenticationCode: base32,
-    });
+  public enableTwoFactorAuthentication = async (user: User): Promise<boolean> => {
+    if (user?.security?.isEnable2Fa) {
+      UserException.enabled2FA();
+    }
+    const oldSecurity = user?.security;
+    const res = await this.user.updateOne(
+      { _id: user._id },
+      { currentStep: CurrentStep.SETUP_2FA_COMPLETED, security: { ...oldSecurity, isEnable2Fa: true } },
+    );
+    return res ? true : false;
   };
 
   public responseQRcode = async (otpauthUrl: string, response: Response) => {

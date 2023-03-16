@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
 
 export class LoginUserDTO {
   @IsEmail()
@@ -9,6 +9,6 @@ export class LoginUserDTO {
   @Length(10, 20)
   public password: string;
 
-  @Length(6)
+  @IsOptional()
   public twofaCode: string;
 }
