@@ -1,4 +1,4 @@
-import { CurrentStep } from '@/enums/LoginProcessEnum';
+import { CurrentStepEnum } from '@/enums/StepEnum';
 import { User } from '@/interfaces/user.interface';
 import { Document, model, Schema } from 'mongoose';
 
@@ -13,24 +13,22 @@ const userSchema: Schema = new Schema(
       type: String,
       required: true,
     },
-    // status: {
-    //   type: String,
-    //   enum: UserStatusEnum,
-    //   require: true,
-    //   default: UserStatusEnum.PENDING,
-    // },
+
     activeCode: { type: String },
     lastTimeGenerateActiveCode: { type: Date },
     currentStep: {
       type: String,
-      enum: CurrentStep,
+      enum: CurrentStepEnum,
       require: true,
-      default: CurrentStep.REGISTERED,
+      default: CurrentStepEnum.REGISTERED,
     },
     twoFactorAuthenticationCode: { type: String },
     security: { type: Object },
     otpauthUrl: { type: String },
     verifyOpCode: { type: Boolean, default: false },
+    blockchainData: {
+      type: Object,
+    },
   },
   { timestamps: true },
 );

@@ -63,4 +63,15 @@ export class UserException extends HttpException {
 
     throw new UserException(200, response);
   }
+
+  public static walletInstaller() {
+    const response = new ResponseDTO(this.ERROR_CODE + 11, 'UserService: Wallet installer', null);
+
+    throw new UserException(200, response);
+  }
+  public static blockchainError(message: string) {
+    const response = new ResponseDTO(this.ERROR_CODE + 12, `UserService: Transaction fail with reason ${message}`, null);
+
+    throw new UserException(200, response);
+  }
 }

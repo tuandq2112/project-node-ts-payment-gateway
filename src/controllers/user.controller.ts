@@ -1,5 +1,6 @@
 import { LoginUserDTO } from '@/dtos/user/login.user.dto';
 import { RegisterUserDTO } from '@/dtos/user/register.user.dto';
+import { SetupWalletDTO } from '@/dtos/user/setup.wallet.dto';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import { User } from '@/interfaces/user.interface';
 import userService from '@/services/user.service';
@@ -65,6 +66,16 @@ class UserController extends BaseResponseController {
       const { token, verifyOpCode, jwtData } = await this.userService.login(body);
       const result = { token, merchant: jwtData, verifyOpCode };
 
+      this.response(res, result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public setupWallet = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    try {
+      const body: SetupWalletDTO = req.body;
+      const result = await this.userService.setupWallet(body, req.user);
       this.response(res, result);
     } catch (error) {
       console.log(error);

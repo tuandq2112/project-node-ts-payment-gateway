@@ -1,5 +1,5 @@
 import { Security } from '@/dtos/user/security.dto';
-import { CurrentStep } from '@/enums/LoginProcessEnum';
+import { CurrentStepEnum } from '@/enums/StepEnum';
 
 export interface User {
   _id: string;
@@ -8,7 +8,7 @@ export interface User {
   // status: UserStatusEnum;
   activeCode: string;
   lastTimeGenerateActiveCode: Date;
-  currentStep: CurrentStep;
+  currentStep: CurrentStepEnum;
   twoFactorAuthenticationCode: string;
   security: Security;
   otpauthUrl: string;

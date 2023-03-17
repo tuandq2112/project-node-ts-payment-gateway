@@ -1,10 +1,9 @@
-class WalletDTO {
-  public bip44Path: string;
-  public currency: string;
-  public isMainnet: string;
-  public network: string;
-  public networkId: string;
-  public transactionUrl: string;
+import { CURRENCY, NETWORK_ID, TRANSACTION_URL } from '@/config';
+
+export class WalletDTO {
+  public currency = CURRENCY;
+  public networkId = NETWORK_ID;
+  public transactionUrl = TRANSACTION_URL;
   public transactionHash: string;
   public address: string;
   public contract: string;

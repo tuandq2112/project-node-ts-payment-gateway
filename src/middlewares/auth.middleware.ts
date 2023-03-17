@@ -1,4 +1,4 @@
-import { CurrentStep } from '@/enums/LoginProcessEnum';
+import { CurrentStepEnum } from '@/enums/StepEnum';
 import { AuthException } from '@/exceptions/AuthExeception';
 import userModel from '@/models/user.model';
 import JwtService from '@/services/jwt.service';
@@ -12,20 +12,21 @@ const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFun
 
     if (Authorization) {
       const verificationResponse = JwtService.verifyToken(Authorization);
-      console.log(verificationResponse);
 
-      const currentStep = verificationResponse.currentStep;
       const account = verificationResponse.email;
-      const verifyOpCode = verificationResponse.verifyOpCode;
 
-      if (currentStep == CurrentStep.VERIFIED) {
-        if (!verifyOpCode) {
-          next(AuthException.twoFaNotWork());
-        }
-      }
       const findUser = await userModel.findOne({ account });
 
       if (findUser) {
+        const verifyOpCode = findUser.verifyOpCode;
+        const currentStep = findUser.currentStep;
+
+        if (currentStep == CurrentStepEnum.SETUP_WALLET_COMPLETED) {
+          if (!verifyOpCode) {
+            next(AuthException.twoFaNotWork());
+          }
+        }
+
         req.user = findUser;
         next();
       } else {

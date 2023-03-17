@@ -1,4 +1,4 @@
-export enum CurrentStep {
+export enum CurrentStepEnum {
   REGISTERED = 'REGISTERED',
   EMAIL_VERIFIED = 'EMAIL_VERIFIED',
   SETUP_2FA_COMPLETED = 'SETUP_2FA_COMPLETED',
