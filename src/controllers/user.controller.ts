@@ -44,6 +44,7 @@ class UserController extends BaseResponseController {
   public generateQR = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
       const account = req.user.email;
+
       const otpauthUrl = await this.userService.getOptAuthUrl(account);
       this.userService.responseQRcode(otpauthUrl, res);
     } catch (error) {

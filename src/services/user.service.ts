@@ -125,7 +125,9 @@ class UserService {
 
     if (!findUser) {
       UserException.userNotFound();
-      return;
+    }
+    if (!findUser.otpauthUrl) {
+      UserException.accountNotVerify();
     }
 
     return findUser.otpauthUrl;

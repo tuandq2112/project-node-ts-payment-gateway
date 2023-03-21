@@ -15,7 +15,7 @@ const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFun
 
       const account = verificationResponse.email;
 
-      const findUser = await userModel.findOne({ account });
+      const findUser = await userModel.findOne({ email: account });
 
       if (findUser) {
         const verifyOpCode = findUser.verifyOpCode;
