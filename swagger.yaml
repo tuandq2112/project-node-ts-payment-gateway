@@ -3,6 +3,8 @@ tags:
     description: User documentation
   - name: upload
     description: Upload documentation
+  - name: exchangeRate
+    description: token price
 security:
   - bearerAuth: []
 paths:
@@ -113,6 +115,43 @@ paths:
         500:
           description: 'Server Error'
 
+  ## ExchangeRate tag
+  # [GET-POST] fiat-to-crypto
+  /fiat-to-crypto:
+    get:
+      tags: 
+        - exchangeRate
+      summary: fiat-to-crypto converter
+      parameters:
+        - name: localCurrency
+          in: query
+          description: localCurrency data
+          required: true
+        - name: amount
+          in: query
+          description: amount data
+          required: true
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
+    post:
+      tags: 
+        - exchangeRate
+      summary: fiat-to-crypto setup token active/inactive
+      parameters:
+        - name: body
+          in: body
+          description: exchange data
+          required: true
+          schema:
+            $ref: '#/definitions/exchange'
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
   ## File tag
   # [POST] File
   /upload/single:
@@ -197,6 +236,18 @@ definitions:
       password:
         type: string
         description: User password
+  exchange:
+    type: object
+    required:
+      - symbol
+      - status
+    properties:
+      symbol:
+        type: string
+        description: symbol of token
+      status:
+        type: string
+        description: enum["active", "inactive"]
   login:
     type: object
     required:
