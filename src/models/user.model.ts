@@ -1,7 +1,6 @@
 import { CurrentStepEnum } from '@/enums/StepEnum';
 import { User } from '@/interfaces/user.interface';
 import { Document, model, Schema } from 'mongoose';
-import ApiKeyModel from './apikey.model';
 
 const userSchema: Schema = new Schema(
   {
@@ -30,7 +29,8 @@ const userSchema: Schema = new Schema(
     blockchainData: {
       type: Object,
     },
-    apikeys: [Schema.Types.ObjectId]
+    // apikeys: [Schema.Types.ObjectId]
+    apikeys: [{ type: Schema.Types.ObjectId, ref: 'apikey' }]
   },
   { timestamps: true },
 );
