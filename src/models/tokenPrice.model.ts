@@ -1,5 +1,7 @@
 import { Document, model, Schema } from 'mongoose';
 import { TokenPrice } from '@/interfaces/tokenprice.interface';
+import { CurrentStatusEnum } from '@/enums/StatusEnum';
+
 const tokenPriceSchema = new Schema(
   {
     name: {
@@ -21,8 +23,9 @@ const tokenPriceSchema = new Schema(
     },
     status: {
       type: String,
-      //   required: "status cannot be blank",
-      default: "active",
+      enum: CurrentStatusEnum,
+      required: true,
+      default: CurrentStatusEnum.ACTIVE
     },
     timestamp: {
       type: Date,

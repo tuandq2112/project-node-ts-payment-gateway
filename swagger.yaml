@@ -5,6 +5,8 @@ tags:
     description: Upload documentation
   - name: exchangeRate
     description: token price
+  - name: apikey
+    description: api key
 security:
   - bearerAuth: []
 paths:
@@ -152,6 +154,48 @@ paths:
           description: 'OK'
         500:
           description: 'Server Error'
+  
+  ## ApiKey
+  # [GET] generate new api key
+  /apikey/new:
+    get:
+      tags: 
+        - apikey
+      summary: generate new api key
+      parameters:
+        - name: Authorization
+          in: header
+          description: an authorization header
+          required: true
+          type: string
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
+  # [DELETE] remove api key
+  /apikey/{apikey}:
+    delete:
+      tags: 
+        - apikey
+      summary: delete api key
+      parameters:
+        - name: Authorization
+          in: header
+          description: an authorization header
+          required: true
+          type: string
+        - name: apikey
+          in: path
+          description: api key string length 20
+          required: true
+          type: string
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
+  
   ## File tag
   # [POST] File
   /upload/single:
