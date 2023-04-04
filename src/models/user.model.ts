@@ -27,14 +27,20 @@ const userSchema: Schema = new Schema(
     otpauthUrl: { type: String },
     verifyOpCode: { type: Boolean, default: false },
     blockchainData: {
-      type: Object,
+      transactionHash: { type: String },
+      address: { type: String },
+      contract: { type: String },
+      currencies: [{ type: Schema.Types.ObjectId, ref: 'coll_token_price' }],
     },
-    // apikeys: [Schema.Types.ObjectId]
-    apikeys: [{ type: Schema.Types.ObjectId, ref: 'apikey' }]
+    apikeys: [{ type: Schema.Types.ObjectId, ref: 'coll_apikey' }],
   },
-  { timestamps: true },
+  {
+    collection: 'coll_user',
+    timestamps: true,
+    versionKey: false,
+  },
 );
 
-const UserModel = model<User & Document>('user', userSchema);
+const UserModel = model<User & Document>('coll_user', userSchema);
 
 export default UserModel;

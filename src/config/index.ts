@@ -30,5 +30,7 @@ export const {
   OPERATOR_PRIVATE_KEY,
   RPC_URL,
   FACTORY_ADDRESS,
+  DAY_EXPIRED_INVOICE,
+  DEFAULT_CURRENCIES,
 } = process.env;
 export const ABSOLUTE_PATH = './files/public/';

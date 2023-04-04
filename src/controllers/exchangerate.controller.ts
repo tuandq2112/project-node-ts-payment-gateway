@@ -20,32 +20,38 @@ class ExchangeRateController extends BaseResponseController {
   public setupTokenPrice = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const tokenPrice: TokenPrice = req.body;
-      const result: boolean = await this.exchangeRateService.setupTokenPrice({
-        status: tokenPrice.status
-      }, {
-        symbol: tokenPrice.symbol
-      });
+      const result: boolean = await this.exchangeRateService.setupTokenPrice(
+        {
+          status: tokenPrice.status,
+        },
+        {
+          symbol: tokenPrice.symbol,
+        },
+      );
       this.response(res, result);
     } catch (error) {
       next(error);
     }
-  }; 
+  };
 
   public addTokenPrice = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const tokenPrice: TokenPrice = req.body;
-      const result: boolean = await this.exchangeRateService.setupTokenPrice({
-        name: tokenPrice.name,
-        symbol: tokenPrice.symbol,
-        decimal: tokenPrice.decimal,
-      }, {
-        symbol: tokenPrice.symbol
-      });
+      const result: boolean = await this.exchangeRateService.setupTokenPrice(
+        {
+          name: tokenPrice.name,
+          symbol: tokenPrice.symbol,
+          decimal: tokenPrice.decimal,
+        },
+        {
+          symbol: tokenPrice.symbol,
+        },
+      );
       this.response(res, result);
     } catch (error) {
       next(error);
     }
-  }; 
+  };
 }
 
 export default ExchangeRateController;

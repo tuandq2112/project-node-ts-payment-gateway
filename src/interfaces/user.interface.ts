@@ -13,4 +13,11 @@ export interface User {
   security: Security;
   otpauthUrl: string;
   verifyOpCode: boolean;
+  blockchainData: {
+    transactionHash: string;
+    address: string;
+    contract: string;
+    currencies: string[];
+  };
+  apikeys: string;
 }

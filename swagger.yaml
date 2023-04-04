@@ -7,6 +7,8 @@ tags:
     description: token price
   - name: apikey
     description: api key
+  - name: invoice
+    description: invoice - one kind of charge
 security:
   - bearerAuth: []
 paths:
@@ -121,7 +123,7 @@ paths:
   # [GET-POST] fiat-to-crypto
   /fiat-to-crypto:
     get:
-      tags: 
+      tags:
         - exchangeRate
       summary: fiat-to-crypto converter
       parameters:
@@ -139,7 +141,7 @@ paths:
         500:
           description: 'Server Error'
     post:
-      tags: 
+      tags:
         - exchangeRate
       summary: fiat-to-crypto setup token active/inactive
       parameters:
@@ -154,12 +156,12 @@ paths:
           description: 'OK'
         500:
           description: 'Server Error'
-  
+
   ## ApiKey
   # [GET] generate new api key
   /apikey/new:
     get:
-      tags: 
+      tags:
         - apikey
       summary: generate new api key
       parameters:
@@ -176,7 +178,7 @@ paths:
   # [DELETE] remove api key
   /apikey/{apikey}:
     delete:
-      tags: 
+      tags:
         - apikey
       summary: delete api key
       parameters:
@@ -195,7 +197,69 @@ paths:
           description: 'OK'
         500:
           description: 'Server Error'
-  
+
+  ## Invoice
+  # [POST] create a voice
+  /invoices:
+    post:
+      tags:
+        - invoice
+      summary: create a voice
+      parameters:
+        - name: Authorization
+          in: header
+          description: an authorization header
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: invoice data
+          required: true
+          schema:
+            $ref: '#/definitions/invoice'
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
+    get:
+      tags:
+        - invoice
+      summary: get list invoices
+      parameters:
+        - name: Authorization
+          in: header
+          description: an authorization header
+          required: true
+          type: string
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
+  # [GET] get a invoice by code
+  /charges/{code}:
+    get:
+      tags:
+        - invoice
+      summary: get a invoice by code
+      parameters:
+        - name: Authorization
+          in: header
+          description: an authorization header
+          required: true
+          type: string
+        - name: code
+          in: path
+          description: code string length 12
+          required: true
+          type: string
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
+
   ## File tag
   # [POST] File
   /upload/single:
@@ -307,7 +371,32 @@ definitions:
       twofaCode:
         type: string
         description: Two factor authentication
-
+  invoice:
+    type: object
+    required:
+      - email
+      - currencyType
+      - currency
+      - amount
+    properties:
+      email:
+        type: string
+        description: User email
+      currencyType:
+        type: string
+        description: currencyType LOCAL_CURRENCY/CRYPTO_CURRENCY
+      currency:
+        type: string
+        description: currency symbol
+      amount:
+        type: number
+        description: amount
+      name:
+        type: string
+        description: name
+      memo:
+        type: string
+        description: memo
 schemes:
   - https
   - http

@@ -1,5 +1,4 @@
 import UploadController from '@/controllers/upload.controller';
-// import authMiddleware from '@/middlewares/auth.middleware';
 import upload from '@/upload';
 import { Routes } from '@interfaces/routes.interface';
 import { Router } from 'express';

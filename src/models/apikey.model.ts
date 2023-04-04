@@ -11,19 +11,24 @@ const apikeySchema: Schema = new Schema(
       unique: true,
     },
     owner: {
-      type: Schema.Types.ObjectId, ref: UserModel.collection.collectionName,
+      type: Schema.Types.ObjectId,
+      ref: UserModel.collection.collectionName,
       required: true,
     },
     status: {
       type: String,
       enum: CurrentStatusEnum,
       required: true,
-      default: CurrentStatusEnum.ACTIVE
-    }
+      default: CurrentStatusEnum.ACTIVE,
+    },
   },
-  { timestamps: true },
+  {
+    collection: 'coll_apikey',
+    timestamps: true,
+    versionKey: false,
+  },
 );
 
-const ApiKeyModel = model<APIKEY & Document>('apikey', apikeySchema);
+const ApiKeyModel = model<APIKEY & Document>('coll_apikey', apikeySchema);
 
 export default ApiKeyModel;

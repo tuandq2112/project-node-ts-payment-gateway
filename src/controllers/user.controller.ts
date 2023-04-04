@@ -6,9 +6,11 @@ import { User } from '@/interfaces/user.interface';
 import userService from '@/services/user.service';
 import { NextFunction, Request, Response } from 'express';
 import { BaseResponseController } from './base/BaseResponseController';
+import { SetupCurrencyDTO } from '@/dtos/user/setup.currency.dto';
 
 class UserController extends BaseResponseController {
   public userService = new userService();
+
   public register = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const body: RegisterUserDTO = req.body;
@@ -77,6 +79,18 @@ class UserController extends BaseResponseController {
     try {
       const body: SetupWalletDTO = req.body;
       const result = await this.userService.setupWallet(body, req.user);
+      this.response(res, result);
+    } catch (error) {
+      console.log(error);
+
+      next(error);
+    }
+  };
+
+  public setupCurrency = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    try {
+      const body: SetupCurrencyDTO = req.body;
+      const result = await this.userService.setupCurrency(body, req.user);
       this.response(res, result);
     } catch (error) {
       console.log(error);

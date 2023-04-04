@@ -1,5 +1,5 @@
 import MerChantFactoryJson from '@/builder/MerchantFactory.json';
-import { FACTORY_ADDRESS, FRONT_END_URL, OPERATOR_PRIVATE_KEY, RPC_URL } from '@/config';
+import { DEFAULT_CURRENCIES, FACTORY_ADDRESS, FRONT_END_URL, OPERATOR_PRIVATE_KEY, RPC_URL } from '@/config';
 import { LoginUserDTO } from '@/dtos/user/login.user.dto';
 import { RegisterUserDTO } from '@/dtos/user/register.user.dto';
 import { SetupWalletDTO } from '@/dtos/user/setup.wallet.dto';
@@ -15,10 +15,29 @@ import { Response } from 'express';
 import { TwoFactorAuthenticationService } from './2fa.service';
 import EmailService from './email.service';
 import JwtService from './jwt.service';
+import { SetupCurrencyDTO } from '@/dtos/user/setup.currency.dto';
+import TokenPriceModel from '@/models/tokenPrice.model';
 class UserService {
   public user = userModel;
   public authenticationService = new TwoFactorAuthenticationService();
   public emailService = new EmailService();
+  public defaultCurrencies = [];
+
+  constructor() {
+    this.init();
+  }
+
+  public init = async () => {
+    const currencies = DEFAULT_CURRENCIES.split(',');
+    let token_price_arr = await TokenPriceModel.find({ symbol: { $in: currencies } }, { _id: 1 });
+    let currency_arr = [];
+    for (const currency of token_price_arr) {
+      currency_arr.push(currency._id);
+    }
+
+    this.defaultCurrencies = currency_arr;
+    return;
+  };
 
   public async register(registerDTO: RegisterUserDTO): Promise<User> {
     const findUser = await this.user.findOne({ email: registerDTO.email });
@@ -29,18 +48,20 @@ class UserService {
     const hashedPassword = await hash(registerDTO.password, 10);
 
     const randomString = generateRandomString(20);
-    const sendResult = await this.sendVerifyEmail(registerDTO.email, randomString);
-    if (sendResult) {
-      const newUser = await this.user.create({
-        ...registerDTO,
-        password: hashedPassword,
-        activeCode: randomString,
-        lastTimeGenerateActiveCode: new Date(),
-      });
-      return newUser;
-    } else {
-      UserException.sendVerifyEmailFail();
-    }
+    // const sendResult = await this.sendVerifyEmail(registerDTO.email, randomString); // 2.5-3s
+    // if (sendResult) {
+    const newUser = await this.user.create({
+      ...registerDTO,
+      password: hashedPassword,
+      activeCode: randomString,
+      lastTimeGenerateActiveCode: new Date(),
+      blockchainData: { currencies: this.defaultCurrencies },
+    });
+    this.sendVerifyEmail(registerDTO.email, randomString);
+    return newUser;
+    // } else {
+    //   UserException.sendVerifyEmailFail();
+    // }
   }
 
   public async resendVerifyEmail(email: string): Promise<boolean> {
@@ -155,15 +176,27 @@ class UserService {
     }
     let walletDTO: WalletDTO = new WalletDTO();
     const transactionResponse = await this.createNewMerchantContract(dto.address);
-    walletDTO = { ...walletDTO, ...transactionResponse };
+    walletDTO = { ...walletDTO, ...transactionResponse, currencies: user.blockchainData.currencies };
     const oldSecurity = user?.security;
 
     await this.user.updateOne(
       { _id: user._id },
-      { currentStep: CurrentStepEnum.SETUP_WALLET_COMPLETED, security: { ...oldSecurity, isSetupWallet: true } },
+      { currentStep: CurrentStepEnum.SETUP_WALLET_COMPLETED, security: { ...oldSecurity, isSetupWallet: true }, blockchainData: walletDTO },
     );
     return walletDTO;
   };
+
+  public setupCurrency = async (dto: SetupCurrencyDTO, user: User): Promise<any> => {
+    if (user.currentStep == CurrentStepEnum.VERIFIED) {
+      UserException.accountNotVerify();
+    }
+
+    let token_price_arr = await TokenPriceModel.find({ symbol: { $in: dto.currencies } }, { _id: 1 });
+    console.log(token_price_arr);
+
+    return token_price_arr;
+  };
+
   private async sendVerifyEmail(account: string, randomString: string): Promise<boolean> {
     const verifyUrl = `${FRONT_END_URL}?account=${account}&verifyCode=${randomString}`;
     return new Promise((resolve, reject) => {
@@ -186,7 +219,7 @@ class UserService {
       const response = await contract.createNewMerchant(address);
       const response2 = await response.wait();
       const contractAddress = await contract.merchantPair(address);
-      return { transactionHash: response2.transactionHash, address, contractAddress };
+      return { transactionHash: response2.transactionHash, address, contract: contractAddress };
     } catch (error) {
       UserException.blockchainError(error.reason);
     }
