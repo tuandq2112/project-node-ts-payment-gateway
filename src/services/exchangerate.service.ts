@@ -1,6 +1,8 @@
 import { CurrentStatusEnum } from '@/enums/StatusEnum';
 import TokenPriceModel from '@/models/tokenPrice.model';
 import { TokenPrice } from '@/interfaces/tokenprice.interface';
+import FiatPriceModel from '@/models/fiatPrice.model';
+import { FiatPrice } from '@/interfaces/fiatprice.interface';
 
 class ExchangeRateService {
   public tokenPriceModel = TokenPriceModel;
@@ -17,14 +19,14 @@ class ExchangeRateService {
       let result = this.convertPriceUSD(instance, amount);
       return result;
     } else {
-      const instanceVND = await this.tokenPriceModel.findOne(
+      const instanceLocal = await FiatPriceModel.findOne(
         {
-          symbol: 'VND',
+          symbol: localCurrency,
         },
         { _id: 0, __v: 0, createdAt: 0 },
       );
 
-      let result = this.convertPriceVND(instanceVND, instance, amount);
+      let result = this.convertPriceLocal(instanceLocal, instance, amount);
       return result;
     }
   }
@@ -50,14 +52,14 @@ class ExchangeRateService {
       let result = this.convertPriceUSDWei(instance, amount);
       return { addresses, price: result };
     } else {
-      const instanceVND = await this.tokenPriceModel.findOne(
+      const instanceLocal = await this.tokenPriceModel.findOne(
         {
-          symbol: 'VND',
+          symbol: localCurrency,
         },
         { _id: 0, __v: 0, createdAt: 0 },
       );
 
-      let result = this.convertPriceVNDWei(instanceVND, instance, amount);
+      let result = this.convertPriceLocalWei(instanceLocal, instance, amount);
       return { addresses: addresses, price: result };
     }
   }
@@ -93,20 +95,16 @@ class ExchangeRateService {
     return res;
   };
 
-  private convertPriceVND = (instanceVND: TokenPrice, tokenPriceList: TokenPrice[], amount: Number): any => {
+  private convertPriceLocal = (instanceLocal: FiatPrice, tokenPriceList: TokenPrice[], amount: Number): any => {
     const res = [];
     for (const tokenPrice of tokenPriceList) {
-      if (tokenPrice.symbol != 'VND') {
-        let element = {
-          amount: Number(amount) / Number(tokenPrice.price) / Number(instanceVND.price),
-          currency: tokenPrice.symbol,
-          rate: {
-            'vnd-usd': instanceVND.price,
-          },
-        };
-        element.rate[`${tokenPrice.symbol.toLowerCase()}-usd`] = tokenPrice.price;
-        res.push(element);
-      }
+      let element = {
+        amount: Number(amount) / Number(tokenPrice.price) / Number(instanceLocal.price),
+        currency: tokenPrice.symbol,
+        rate: {},
+      };
+      element.rate[`${tokenPrice.symbol.toLowerCase()}-usd`] = tokenPrice.price;
+      res.push(element);
     }
 
     return res;
@@ -115,40 +113,34 @@ class ExchangeRateService {
   private convertPriceUSDWei = (tokenPriceList: TokenPrice[], amount: Number): any => {
     const res = [];
     for (const tokenPrice of tokenPriceList) {
-      if (tokenPrice.symbol != 'VND') {
-        let element = {
-          amountWei: (Number(amount) / Number(tokenPrice.price)) * 10 ** tokenPrice.decimal,
-          amount: Number(amount) / Number(tokenPrice.price),
-          currency: tokenPrice.symbol,
-          address: tokenPrice.address,
-          rate: {
-            'usd-usd': 1,
-          },
-        };
-        element.rate[`${tokenPrice.symbol.toLowerCase()}-usd`] = tokenPrice.price;
-        res.push(element);
-      }
+      let element = {
+        amountWei: (Number(amount) / Number(tokenPrice.price)) * 10 ** tokenPrice.decimal,
+        amount: Number(amount) / Number(tokenPrice.price),
+        currency: tokenPrice.symbol,
+        address: tokenPrice.address,
+        rate: {
+          'usd-usd': 1,
+        },
+      };
+      element.rate[`${tokenPrice.symbol.toLowerCase()}-usd`] = tokenPrice.price;
+      res.push(element);
     }
 
     return res;
   };
 
-  private convertPriceVNDWei = (instanceVND: TokenPrice, tokenPriceList: TokenPrice[], amount: Number): any => {
+  private convertPriceLocalWei = (instanceLocal: TokenPrice, tokenPriceList: TokenPrice[], amount: Number): any => {
     const res = [];
     for (const tokenPrice of tokenPriceList) {
-      if (tokenPrice.symbol != 'VND') {
-        let element = {
-          amountWei: (Number(amount) / Number(tokenPrice.price)) * 10 ** tokenPrice.decimal,
-          amount: Number(amount) / Number(tokenPrice.price) / Number(instanceVND.price),
-          currency: tokenPrice.symbol,
-          address: tokenPrice.address,
-          rate: {
-            'vnd-usd': instanceVND.price,
-          },
-        };
-        element.rate[`${tokenPrice.symbol.toLowerCase()}-usd`] = tokenPrice.price;
-        res.push(element);
-      }
+      let element = {
+        amountWei: (Number(amount) / Number(tokenPrice.price)) * 10 ** tokenPrice.decimal,
+        amount: Number(amount) / Number(tokenPrice.price) / Number(instanceLocal.price),
+        currency: tokenPrice.symbol,
+        address: tokenPrice.address,
+        rate: {},
+      };
+      element.rate[`${tokenPrice.symbol.toLowerCase()}-usd`] = tokenPrice.price;
+      res.push(element);
     }
 
     return res;

@@ -9,7 +9,7 @@ import { NextFunction, Response } from 'express';
 const authApiKeyMiddleware = async (req: RequestWithUser, res: Response, next: NextFunction) => {
   try {
     const APIKEY = req.header('ipg-apikey') ? req.header('ipg-apikey') : null;
-    console.log(req.path);
+    // console.log(req.path);
 
     if (APIKEY) {
       const foundApiKey = await ApiKeyModel.findOne({

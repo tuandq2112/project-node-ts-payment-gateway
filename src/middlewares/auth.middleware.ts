@@ -8,7 +8,7 @@ import { NextFunction, Response } from 'express';
 const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFunction) => {
   try {
     const Authorization = req.header('Authorization') ? req.header('Authorization').split('Bearer ')[1] : null;
-    console.log(req.path);
+    // console.log(req.path);
 
     if (Authorization) {
       const verificationResponse = JwtService.verifyToken(Authorization);

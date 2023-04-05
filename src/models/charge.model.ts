@@ -3,20 +3,20 @@ import { Charge } from '@/interfaces/charge.interface';
 import { TransactionTypeEnum } from '@/enums/TransactionTypeEnum';
 import { ChargeStatusEnum, ContextChargeStatusEnum } from '@/enums/StatusEnum';
 
-// const metadataSchema = new Schema({
-//   orderId: {
-//     type: String,
-//     required: 'orderId cannot be blank',
-//   },
-//   orderKey: {
-//     type: String,
-//     required: 'orderKey cannot be blank',
-//   },
-//   source: {
-//     type: String,
-//     required: 'source cannot be blank',
-//   },
-// });
+const metadataSchema = new Schema({
+  orderId: {
+    type: String,
+    required: 'orderId cannot be blank',
+  },
+  orderKey: {
+    type: String,
+    required: 'orderKey cannot be blank',
+  },
+  source: {
+    type: String,
+    required: 'source cannot be blank',
+  },
+});
 
 const chargeSchema = new Schema(
   {
@@ -74,19 +74,22 @@ const chargeSchema = new Schema(
     },
 
     metatdata: {
-      orderId: {
-        type: String,
-        required: 'orderId cannot be blank',
-      },
-      orderKey: {
-        type: String,
-        required: 'orderKey cannot be blank',
-      },
-      source: {
-        type: String,
-        required: 'source cannot be blank',
-      },
+      type: metadataSchema,
     },
+    // metatdata: {
+    //   orderId: {
+    //     type: String,
+    //     required: 'orderId cannot be blank',
+    //   },
+    //   orderKey: {
+    //     type: String,
+    //     required: 'orderKey cannot be blank',
+    //   },
+    //   source: {
+    //     type: String,
+    //     required: 'source cannot be blank',
+    //   },
+    // },
     logoUrl: {
       type: String,
     },

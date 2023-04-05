@@ -17,6 +17,7 @@ import EmailService from './email.service';
 import JwtService from './jwt.service';
 import { SetupCurrencyDTO } from '@/dtos/user/setup.currency.dto';
 import TokenPriceModel from '@/models/tokenPrice.model';
+import UserModel from '@/models/user.model';
 class UserService {
   public user = userModel;
   public authenticationService = new TwoFactorAuthenticationService();
@@ -192,9 +193,9 @@ class UserService {
     }
 
     let token_price_arr = await TokenPriceModel.find({ symbol: { $in: dto.currencies } }, { _id: 1 });
-    console.log(token_price_arr);
+    let res = await UserModel.updateOne({ _id: user._id }, { 'blockchainData.currencies': token_price_arr });
 
-    return token_price_arr;
+    return res;
   };
 
   private async sendVerifyEmail(account: string, randomString: string): Promise<boolean> {
