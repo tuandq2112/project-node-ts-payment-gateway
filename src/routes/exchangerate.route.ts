@@ -24,7 +24,7 @@ class ExchangeRateRoute implements Routes {
     //use auth
     // access with admin role
     // add validate ? /////
-    this.router.post(`${this.path}`, this.exchangeRateController.setupTokenPrice);
+    this.router.post(`${this.path}`, this.exchangeRateController.setupCryptoPrice);
   }
 }
 

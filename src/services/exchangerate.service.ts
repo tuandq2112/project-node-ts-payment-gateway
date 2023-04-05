@@ -1,14 +1,15 @@
 import { CurrentStatusEnum } from '@/enums/StatusEnum';
-import TokenPriceModel from '@/models/tokenPrice.model';
-import { TokenPrice } from '@/interfaces/tokenprice.interface';
+import CryptoPriceModel from '@/models/cryptoPrice.model';
+import { CryptoPrice } from '@/interfaces/cryptoprice.interface';
 import FiatPriceModel from '@/models/fiatPrice.model';
 import { FiatPrice } from '@/interfaces/fiatprice.interface';
+import { BigNumber } from 'ethers';
 
 class ExchangeRateService {
-  public tokenPriceModel = TokenPriceModel;
+  public cryptoPriceModel = CryptoPriceModel;
 
   public async convert(localCurrency: string, amount: number): Promise<any> {
-    const instance = await this.tokenPriceModel.find(
+    const instance = await this.cryptoPriceModel.find(
       {
         status: CurrentStatusEnum.ACTIVE,
       },
@@ -32,7 +33,7 @@ class ExchangeRateService {
   }
 
   public async convertWei(localCurrency: string, currencies: string[], amount: Number): Promise<any> {
-    const instance = await TokenPriceModel.find(
+    const instance = await CryptoPriceModel.find(
       {
         status: CurrentStatusEnum.ACTIVE,
         _id: { $in: currencies },
@@ -52,7 +53,7 @@ class ExchangeRateService {
       let result = this.convertPriceUSDWei(instance, amount);
       return { addresses, price: result };
     } else {
-      const instanceLocal = await this.tokenPriceModel.findOne(
+      const instanceLocal = await FiatPriceModel.findOne(
         {
           symbol: localCurrency,
         },
@@ -64,10 +65,10 @@ class ExchangeRateService {
     }
   }
 
-  public async setupTokenPrice(tokenPrice: any, cond: any): Promise<boolean> {
-    const instance = await TokenPriceModel.updateOne(
-      cond, // { symbol: tokenPrice.symbol },
-      tokenPrice,
+  public async setupCryptoPrice(cryptoPrice: any, cond: any): Promise<boolean> {
+    const instance = await CryptoPriceModel.updateOne(
+      cond, // { symbol: cryptoPrice.symbol },
+      cryptoPrice,
       {
         upsert: true,
       },
@@ -76,18 +77,18 @@ class ExchangeRateService {
     return instance.acknowledged;
   }
 
-  private convertPriceUSD = (tokenPriceList: TokenPrice[], amount: Number): any => {
+  private convertPriceUSD = (cryptoPriceList: CryptoPrice[], amount: Number): any => {
     const res = [];
-    for (const tokenPrice of tokenPriceList) {
-      if (tokenPrice.symbol != 'VND') {
+    for (const cryptoPrice of cryptoPriceList) {
+      if (cryptoPrice.symbol != 'VND') {
         let element = {
-          amount: Number(amount) / Number(tokenPrice.price),
-          currency: tokenPrice.symbol,
+          amount: Number(amount) / Number(cryptoPrice.price),
+          currency: cryptoPrice.symbol,
           rate: {
             'usd-usd': 1,
           },
         };
-        element.rate[`${tokenPrice.symbol.toLowerCase()}-usd`] = tokenPrice.price;
+        element.rate[`${cryptoPrice.symbol.toLowerCase()}-usd`] = cryptoPrice.price;
         res.push(element);
       }
     }
@@ -95,51 +96,53 @@ class ExchangeRateService {
     return res;
   };
 
-  private convertPriceLocal = (instanceLocal: FiatPrice, tokenPriceList: TokenPrice[], amount: Number): any => {
+  private convertPriceLocal = (instanceLocal: FiatPrice, cryptoPriceList: CryptoPrice[], amount: Number): any => {
     const res = [];
-    for (const tokenPrice of tokenPriceList) {
+    for (const cryptoPrice of cryptoPriceList) {
       let element = {
-        amount: Number(amount) / Number(tokenPrice.price) / Number(instanceLocal.price),
-        currency: tokenPrice.symbol,
+        amount: Number(amount) / Number(cryptoPrice.price) / Number(instanceLocal.price),
+        currency: cryptoPrice.symbol,
         rate: {},
       };
-      element.rate[`${tokenPrice.symbol.toLowerCase()}-usd`] = tokenPrice.price;
+      element.rate[`${cryptoPrice.symbol.toLowerCase()}-usd`] = cryptoPrice.price;
       res.push(element);
     }
 
     return res;
   };
 
-  private convertPriceUSDWei = (tokenPriceList: TokenPrice[], amount: Number): any => {
+  private convertPriceUSDWei = (cryptoPriceList: CryptoPrice[], amount: Number): any => {
     const res = [];
-    for (const tokenPrice of tokenPriceList) {
+    for (const cryptoPrice of cryptoPriceList) {
       let element = {
-        amountWei: (Number(amount) / Number(tokenPrice.price)) * 10 ** tokenPrice.decimal,
-        amount: Number(amount) / Number(tokenPrice.price),
-        currency: tokenPrice.symbol,
-        address: tokenPrice.address,
+        amountWei: (Number(amount) / Number(cryptoPrice.price)) * 10 ** cryptoPrice.decimal,
+        amount: Number(amount) / Number(cryptoPrice.price),
+        currency: cryptoPrice.symbol,
+        address: cryptoPrice.address,
         rate: {
           'usd-usd': 1,
         },
       };
-      element.rate[`${tokenPrice.symbol.toLowerCase()}-usd`] = tokenPrice.price;
+      element.rate[`${cryptoPrice.symbol.toLowerCase()}-usd`] = cryptoPrice.price;
       res.push(element);
     }
 
     return res;
   };
 
-  private convertPriceLocalWei = (instanceLocal: TokenPrice, tokenPriceList: TokenPrice[], amount: Number): any => {
+  private convertPriceLocalWei = (instanceLocal: FiatPrice, cryptoPriceList: CryptoPrice[], amount: Number): any => {
     const res = [];
-    for (const tokenPrice of tokenPriceList) {
+    for (const cryptoPrice of cryptoPriceList) {
+      let amountResult = Number(amount) / Number(cryptoPrice.price) / Number(instanceLocal.price);
       let element = {
-        amountWei: (Number(amount) / Number(tokenPrice.price)) * 10 ** tokenPrice.decimal,
-        amount: Number(amount) / Number(tokenPrice.price) / Number(instanceLocal.price),
-        currency: tokenPrice.symbol,
-        address: tokenPrice.address,
+        amountWei: (amountResult * 10 ** cryptoPrice.decimal).toString(),
+        amount: amountResult,
+        currency: cryptoPrice.symbol,
+        address: cryptoPrice.address,
         rate: {},
       };
-      element.rate[`${tokenPrice.symbol.toLowerCase()}-usd`] = tokenPrice.price;
+      element.rate[`${instanceLocal.symbol.toLowerCase()}-usd`] = instanceLocal.price;
+      element.rate[`${cryptoPrice.symbol.toLowerCase()}-usd`] = cryptoPrice.price;
       res.push(element);
     }
 

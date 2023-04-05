@@ -1,8 +1,8 @@
 import { Document, model, Schema } from 'mongoose';
-import { TokenPrice } from '@/interfaces/tokenprice.interface';
+import { CryptoPrice } from '@/interfaces/cryptoprice.interface';
 import { CurrentStatusEnum } from '@/enums/StatusEnum';
 
-const tokenPriceSchema = new Schema(
+const cryptoPriceSchema = new Schema(
   {
     address: {
       type: String,
@@ -43,6 +43,6 @@ const tokenPriceSchema = new Schema(
   },
 );
 
-const TokenPriceModel = model<TokenPrice & Document>('coll_token_price', tokenPriceSchema);
+const CryptoPriceModel = model<CryptoPrice & Document>('coll_token_price', cryptoPriceSchema);
 
-export default TokenPriceModel;
+export default CryptoPriceModel;

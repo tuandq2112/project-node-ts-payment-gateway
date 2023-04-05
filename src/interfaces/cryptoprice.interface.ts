@@ -1,6 +1,6 @@
 import { CurrentStatusEnum } from '@/enums/StatusEnum';
 
-export interface TokenPrice {
+export interface CryptoPrice {
   _id: string;
   address: string;
   name: string;

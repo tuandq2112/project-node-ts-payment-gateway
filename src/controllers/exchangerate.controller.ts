@@ -1,7 +1,7 @@
 import exchangeRateService from '@/services/exchangerate.service';
 import { NextFunction, Request, Response } from 'express';
 import { BaseResponseController } from './base/BaseResponseController';
-import { TokenPrice } from '@interfaces/tokenprice.interface';
+import { CryptoPrice } from '@interfaces/cryptoprice.interface';
 
 class ExchangeRateController extends BaseResponseController {
   public exchangeRateService = new exchangeRateService();
@@ -17,15 +17,15 @@ class ExchangeRateController extends BaseResponseController {
     }
   };
 
-  public setupTokenPrice = async (req: Request, res: Response, next: NextFunction) => {
+  public setupCryptoPrice = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const tokenPrice: TokenPrice = req.body;
-      const result: boolean = await this.exchangeRateService.setupTokenPrice(
+      const cryptoPrice: CryptoPrice = req.body;
+      const result: boolean = await this.exchangeRateService.setupCryptoPrice(
         {
-          status: tokenPrice.status,
+          status: cryptoPrice.status,
         },
         {
-          symbol: tokenPrice.symbol,
+          symbol: cryptoPrice.symbol,
         },
       );
       this.response(res, result);
@@ -34,17 +34,17 @@ class ExchangeRateController extends BaseResponseController {
     }
   };
 
-  public addTokenPrice = async (req: Request, res: Response, next: NextFunction) => {
+  public addCryptoPrice = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const tokenPrice: TokenPrice = req.body;
-      const result: boolean = await this.exchangeRateService.setupTokenPrice(
+      const cryptoPrice: CryptoPrice = req.body;
+      const result: boolean = await this.exchangeRateService.setupCryptoPrice(
         {
-          name: tokenPrice.name,
-          symbol: tokenPrice.symbol,
-          decimal: tokenPrice.decimal,
+          name: cryptoPrice.name,
+          symbol: cryptoPrice.symbol,
+          decimal: cryptoPrice.decimal,
         },
         {
-          symbol: tokenPrice.symbol,
+          symbol: cryptoPrice.symbol,
         },
       );
       this.response(res, result);

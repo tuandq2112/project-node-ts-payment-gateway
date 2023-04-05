@@ -16,7 +16,7 @@ import { TwoFactorAuthenticationService } from './2fa.service';
 import EmailService from './email.service';
 import JwtService from './jwt.service';
 import { SetupCurrencyDTO } from '@/dtos/user/setup.currency.dto';
-import TokenPriceModel from '@/models/tokenPrice.model';
+import CryptoPriceModel from '@/models/cryptoPrice.model';
 import UserModel from '@/models/user.model';
 class UserService {
   public user = userModel;
@@ -30,7 +30,7 @@ class UserService {
 
   public init = async () => {
     const currencies = DEFAULT_CURRENCIES.split(',');
-    let token_price_arr = await TokenPriceModel.find({ symbol: { $in: currencies } }, { _id: 1 });
+    let token_price_arr = await CryptoPriceModel.find({ symbol: { $in: currencies } }, { _id: 1 });
     let currency_arr = [];
     for (const currency of token_price_arr) {
       currency_arr.push(currency._id);
@@ -192,7 +192,7 @@ class UserService {
       UserException.accountNotVerify();
     }
 
-    let token_price_arr = await TokenPriceModel.find({ symbol: { $in: dto.currencies } }, { _id: 1 });
+    let token_price_arr = await CryptoPriceModel.find({ symbol: { $in: dto.currencies } }, { _id: 1 });
     let res = await UserModel.updateOne({ _id: user._id }, { 'blockchainData.currencies': token_price_arr });
 
     return res;
