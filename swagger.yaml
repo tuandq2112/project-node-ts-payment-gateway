@@ -125,11 +125,12 @@ paths:
         - user
       summary: Send a code 6 digests to email
       parameters:
-        - name: email
+        - name: body
           in: body
-          description: Email
+          description: Forgot password
           required: true
-          type: string
+          schema:
+            $ref: '#/definitions/forgot'
       responses:
         200:
           description: 'OK'
@@ -142,21 +143,12 @@ paths:
         - user
       summary: Change password with 6 digests
       parameters:
-        - name: email
+        - name: body
           in: body
-          description: Email
+          description: Change password
           required: true
-          type: string
-        - name: newPassword
-          in: body
-          description: New password
-          required: true
-          type: string
-        - name: forgotPassCode
-          in: body
-          description: 6 digests sent to email
-          required: true
-          type: string
+          schema:
+            $ref: '#/definitions/change'
       responses:
         200:
           description: 'OK'
@@ -440,6 +432,31 @@ definitions:
       memo:
         type: string
         description: memo
+  forgot:
+    type: object
+    required:
+      - email
+    properties:
+      email:
+        type: string
+        description: User email
+  change:
+    type: object
+    required:
+      - email
+      - newPassword
+      - forgotPassCode
+    properties:
+      email:
+        type: string
+        description: User email
+      newPassword:
+        type: string
+        description: New password
+      forgotPassCode:
+        type: string
+        description: 6 digests received in email
+
 schemes:
   - https
   - http
