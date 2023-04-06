@@ -1,13 +1,16 @@
 import MerChantFactoryJson from '@/builder/MerchantFactory.json';
 import { DEFAULT_CURRENCIES, FACTORY_ADDRESS, FRONT_END_URL, OPERATOR_PRIVATE_KEY, RPC_URL } from '@/config';
+import { Enable2FaDTO } from '@/dtos/user/2fa.code.dto';
 import { LoginUserDTO } from '@/dtos/user/login.user.dto';
 import { RegisterUserDTO } from '@/dtos/user/register.user.dto';
+import { SetupCurrencyDTO } from '@/dtos/user/setup.currency.dto';
 import { SetupWalletDTO } from '@/dtos/user/setup.wallet.dto';
 import { WalletDTO } from '@/dtos/user/wallet.dto';
 import { CurrentStepEnum } from '@/enums/StepEnum';
 import { UserException } from '@/exceptions/UserException';
 import { User } from '@/interfaces/user.interface';
-import userModel from '@/models/user.model';
+import CryptoPriceModel from '@/models/cryptoPrice.model';
+import { default as UserModel, default as userModel } from '@/models/user.model';
 import { generateRandomString } from '@/utils/util';
 import { compare, hash } from 'bcrypt';
 import { ethers } from 'ethers';
@@ -15,9 +18,6 @@ import { Response } from 'express';
 import { TwoFactorAuthenticationService } from './2fa.service';
 import EmailService from './email.service';
 import JwtService from './jwt.service';
-import { SetupCurrencyDTO } from '@/dtos/user/setup.currency.dto';
-import CryptoPriceModel from '@/models/cryptoPrice.model';
-import UserModel from '@/models/user.model';
 class UserService {
   public user = userModel;
   public authenticationService = new TwoFactorAuthenticationService();
@@ -30,8 +30,8 @@ class UserService {
 
   public init = async () => {
     const currencies = DEFAULT_CURRENCIES.split(',');
-    let token_price_arr = await CryptoPriceModel.find({ symbol: { $in: currencies } }, { _id: 1 });
-    let currency_arr = [];
+    const token_price_arr = await CryptoPriceModel.find({ symbol: { $in: currencies } }, { _id: 1 });
+    const currency_arr = [];
     for (const currency of token_price_arr) {
       currency_arr.push(currency._id);
     }
@@ -49,8 +49,7 @@ class UserService {
     const hashedPassword = await hash(registerDTO.password, 10);
 
     const randomString = generateRandomString(20);
-    // const sendResult = await this.sendVerifyEmail(registerDTO.email, randomString); // 2.5-3s
-    // if (sendResult) {
+
     const newUser = await this.user.create({
       ...registerDTO,
       password: hashedPassword,
@@ -60,9 +59,6 @@ class UserService {
     });
     this.sendVerifyEmail(registerDTO.email, randomString);
     return newUser;
-    // } else {
-    //   UserException.sendVerifyEmailFail();
-    // }
   }
 
   public async resendVerifyEmail(email: string): Promise<boolean> {
@@ -116,6 +112,7 @@ class UserService {
     if (verifyOpCode) {
       await this.user.updateOne({ _id: findUser._id }, { verifyOpCode });
     }
+    console.log(findUser);
 
     return { token: res, jwtData };
   }
@@ -155,16 +152,19 @@ class UserService {
     return findUser.otpauthUrl;
   };
 
-  public enableTwoFactorAuthentication = async (user: User): Promise<boolean> => {
-    if (user?.security?.isEnable2Fa) {
+  public enableTwoFactorAuthentication = async (enable2FaDTO: Enable2FaDTO, user: User): Promise<boolean> => {
+    if (user.security?.isEnable2Fa) {
       UserException.enabled2FA();
     }
-    const oldSecurity = user?.security;
-    const res = await this.user.updateOne(
-      { _id: user._id },
-      { currentStep: CurrentStepEnum.SETUP_2FA_COMPLETED, security: { ...oldSecurity, isEnable2Fa: true } },
-    );
-    return res ? true : false;
+    const verifyOpCode = this.authenticationService.verifyTwoFactorAuthenticationCode(enable2FaDTO.authCode, user.twoFactorAuthenticationCode);
+    if (verifyOpCode) {
+      const security = user.security;
+      security.isEnable2Fa = true;
+      const res = await this.user.updateOne({ _id: user._id }, { currentStep: CurrentStepEnum.SETUP_2FA_COMPLETED, security });
+      return !!res;
+    } else {
+      UserException.invalidOpcode();
+    }
   };
 
   public responseQRcode = async (otpauthUrl: string, response: Response) => {
@@ -178,12 +178,9 @@ class UserService {
     let walletDTO: WalletDTO = new WalletDTO();
     const transactionResponse = await this.createNewMerchantContract(dto.address);
     walletDTO = { ...walletDTO, ...transactionResponse, currencies: user.blockchainData.currencies };
-    const oldSecurity = user?.security;
-
-    await this.user.updateOne(
-      { _id: user._id },
-      { currentStep: CurrentStepEnum.SETUP_WALLET_COMPLETED, security: { ...oldSecurity, isSetupWallet: true }, blockchainData: walletDTO },
-    );
+    const security = user?.security;
+    security.isSetupWallet = true;
+    await this.user.updateOne({ _id: user._id }, { currentStep: CurrentStepEnum.SETUP_WALLET_COMPLETED, security, blockchainData: walletDTO });
     return walletDTO;
   };
 
@@ -192,8 +189,8 @@ class UserService {
       UserException.accountNotVerify();
     }
 
-    let token_price_arr = await CryptoPriceModel.find({ symbol: { $in: dto.currencies } }, { _id: 1 });
-    let res = await UserModel.updateOne({ _id: user._id }, { 'blockchainData.currencies': token_price_arr });
+    const token_price_arr = await CryptoPriceModel.find({ symbol: { $in: dto.currencies } }, { _id: 1 });
+    const res = await UserModel.updateOne({ _id: user._id }, { 'blockchainData.currencies': token_price_arr });
 
     return res;
   };

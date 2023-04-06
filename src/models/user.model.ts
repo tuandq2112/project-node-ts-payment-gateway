@@ -1,7 +1,10 @@
 import { CurrentStepEnum } from '@/enums/StepEnum';
 import { User } from '@/interfaces/user.interface';
 import { Document, model, Schema } from 'mongoose';
-
+const Security: Schema = new Schema({
+  isEnable2Fa: { type: Boolean, default: false },
+  isSetupWallet: { type: Boolean, default: false },
+});
 const userSchema: Schema = new Schema(
   {
     email: {
@@ -23,7 +26,7 @@ const userSchema: Schema = new Schema(
       default: CurrentStepEnum.REGISTERED,
     },
     twoFactorAuthenticationCode: { type: String },
-    security: { type: Object },
+    security: { type: Security, default: {} },
     otpauthUrl: { type: String },
     verifyOpCode: { type: Boolean, default: false },
     blockchainData: {

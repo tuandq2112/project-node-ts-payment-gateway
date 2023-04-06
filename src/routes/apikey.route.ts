@@ -14,7 +14,7 @@ class ApiKeyRoute implements Routes {
     //use auth
     this.router.get(`${this.path}/new`, authMiddleware, this.apiKeyController.newApikey);
     this.router.delete(`${this.path}/:apikey`, authMiddleware, this.apiKeyController.removeApikey);
-}
+  }
 }
 
 export default ApiKeyRoute;

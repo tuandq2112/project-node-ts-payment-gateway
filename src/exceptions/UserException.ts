@@ -74,4 +74,10 @@ export class UserException extends HttpException {
 
     throw new UserException(200, response);
   }
+
+  public static invalidOpcode() {
+    const response = new ResponseDTO(this.ERROR_CODE + 13, `UserService: invalid opcode`, null);
+
+    throw new UserException(200, response);
+  }
 }

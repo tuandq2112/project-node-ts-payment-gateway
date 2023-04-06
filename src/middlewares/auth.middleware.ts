@@ -21,7 +21,7 @@ const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFun
         const verifyOpCode = findUser.verifyOpCode;
         const currentStep = findUser.currentStep;
 
-        if (currentStep == CurrentStepEnum.SETUP_WALLET_COMPLETED) {
+        if (currentStep == CurrentStepEnum.SETUP_WALLET_COMPLETED || currentStep == CurrentStepEnum.SETUP_2FA_COMPLETED) {
           if (!verifyOpCode) {
             next(AuthException.twoFaNotWork());
           }

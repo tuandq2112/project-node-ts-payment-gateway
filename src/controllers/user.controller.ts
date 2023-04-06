@@ -1,12 +1,13 @@
+import { Enable2FaDTO } from '@/dtos/user/2fa.code.dto';
 import { LoginUserDTO } from '@/dtos/user/login.user.dto';
 import { RegisterUserDTO } from '@/dtos/user/register.user.dto';
+import { SetupCurrencyDTO } from '@/dtos/user/setup.currency.dto';
 import { SetupWalletDTO } from '@/dtos/user/setup.wallet.dto';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import { User } from '@/interfaces/user.interface';
 import userService from '@/services/user.service';
 import { NextFunction, Request, Response } from 'express';
 import { BaseResponseController } from './base/BaseResponseController';
-import { SetupCurrencyDTO } from '@/dtos/user/setup.currency.dto';
 
 class UserController extends BaseResponseController {
   public userService = new userService();
@@ -56,7 +57,9 @@ class UserController extends BaseResponseController {
 
   public enable2Fa = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
-      const result = await this.userService.enableTwoFactorAuthentication(req.user);
+      const body: Enable2FaDTO = req.body;
+
+      const result = await this.userService.enableTwoFactorAuthentication(body, req.user);
       this.response(res, result);
     } catch (error) {
       next(error);
