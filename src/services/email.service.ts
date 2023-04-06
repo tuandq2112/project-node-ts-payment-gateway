@@ -5,7 +5,8 @@ import fs from 'fs';
 import nodemailer from 'nodemailer';
 import path from 'path';
 
-const html = fs.readFileSync(path.resolve(__dirname, `../../files/private/email/verify.html`));
+const verifyHtml = fs.readFileSync(path.resolve(__dirname, `../../files/private/email/verify.html`));
+const forgotHtml = fs.readFileSync(path.resolve(__dirname, `../../files/private/email/forgot.html`));
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
@@ -17,15 +18,13 @@ const transporter = nodemailer.createTransport({
   },
 });
 class EmailService {
-  public sendVerifyEmail(to: string, redirectUrl: string): Promise<boolean> {
-    const subject = 'Verify your email';
-    const formatHtml = replaceAll(html.toString(), '$REDIRECT_URL$', redirectUrl);
+  private sendEmailWithHtmlTemplate = (to: string, subject: string, html: string): Promise<boolean> => {
     return new Promise((resolve, reject) => {
       const mailOptions = {
         from: EMAIL_USER,
         to: to,
         subject: subject,
-        html: formatHtml,
+        html: html,
       };
       transporter.sendMail(mailOptions, (err: Error) => {
         if (err) {
@@ -36,6 +35,38 @@ class EmailService {
           resolve(true);
         }
       });
+    });
+  };
+
+  public sendVerifyEmail(to: string, redirectUrl: string): Promise<boolean> {
+    const subject = 'Verify your email';
+    const formatHtml = replaceAll(verifyHtml.toString(), '$REDIRECT_URL$', redirectUrl);
+    return new Promise((resolve, reject) => {
+      this.sendEmailWithHtmlTemplate(to, subject, formatHtml)
+        .then(() => {
+          resolve(true);
+        })
+        .catch(err => {
+          reject(err);
+        });
+    });
+  }
+
+  public sendResetPassword(to: string, redirectUrl: string): Promise<boolean> {
+    const subject = 'Reset Password';
+    const replaceAccount = replaceAll(forgotHtml.toString(), '$ACCOUNT$', to);
+    const replapceURL = replaceAll(replaceAccount, '$FORGOT_URL$', redirectUrl);
+
+    return new Promise((resolve, reject) => {
+      this.sendEmailWithHtmlTemplate(to, subject, replapceURL)
+        .then(() => {
+          resolve(true);
+        })
+        .catch(err => {
+          console.log(err);
+
+          reject(err);
+        });
     });
   }
 }

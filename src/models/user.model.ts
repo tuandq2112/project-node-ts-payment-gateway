@@ -36,6 +36,8 @@ const userSchema: Schema = new Schema(
       currencies: [{ type: Schema.Types.ObjectId, ref: 'coll_token_price' }],
     },
     apikeys: [{ type: Schema.Types.ObjectId, ref: 'coll_apikey' }],
+    forgotPassCode: { type: String, length: 6 },
+    lastTimeSendEmailForgotPassword: { type: Date },
   },
   {
     collection: 'coll_user',

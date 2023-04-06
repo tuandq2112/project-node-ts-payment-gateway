@@ -1,4 +1,5 @@
 import { Enable2FaDTO } from '@/dtos/user/2fa.code.dto';
+import { ChangePasswordDTO, ForgotPasswordDTO } from '@/dtos/user/forgot.pass.dto';
 import { LoginUserDTO } from '@/dtos/user/login.user.dto';
 import { RegisterUserDTO } from '@/dtos/user/register.user.dto';
 import { SetupCurrencyDTO } from '@/dtos/user/setup.currency.dto';
@@ -94,6 +95,28 @@ class UserController extends BaseResponseController {
     try {
       const body: SetupCurrencyDTO = req.body;
       const result = await this.userService.setupCurrency(body, req.user);
+      this.response(res, result);
+    } catch (error) {
+      console.log(error);
+
+      next(error);
+    }
+  };
+  public forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const body: ChangePasswordDTO = req.body;
+      const result = await this.userService.sendForgotCodeToEmail(body.email);
+      this.response(res, result);
+    } catch (error) {
+      console.log(error);
+
+      next(error);
+    }
+  };
+  public changePassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const body: ChangePasswordDTO = req.body;
+      const result = await this.userService.changePassword(body);
       this.response(res, result);
     } catch (error) {
       console.log(error);

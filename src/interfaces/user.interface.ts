@@ -20,4 +20,6 @@ export interface User {
     currencies: string[];
   };
   apikeys: string;
+  forgotPassCode: string;
+  lastTimeSendEmailForgotPassword: Date;
 }

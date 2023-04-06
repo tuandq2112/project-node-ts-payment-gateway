@@ -1,6 +1,7 @@
 import UserController from '@/controllers/user.controller';
 import { Enable2FaDTO } from '@/dtos/user/2fa.code.dto';
 import { ActiveUserDTO } from '@/dtos/user/active.user.dto';
+import { ChangePasswordDTO, ForgotPasswordDTO } from '@/dtos/user/forgot.pass.dto';
 import { LoginUserDTO } from '@/dtos/user/login.user.dto';
 import { RegisterUserDTO } from '@/dtos/user/register.user.dto';
 import { ResendEmailDTO } from '@/dtos/user/resend.email.dto';
@@ -24,6 +25,8 @@ class UserRoute implements Routes {
     this.router.put(`${this.path}/resend`, validationMiddleware(ResendEmailDTO, 'query'), this.userController.resendVerifyEmail);
     this.router.put(`${this.path}/active`, validationMiddleware(ActiveUserDTO, 'query'), this.userController.activeAccount);
     this.router.post(`${this.path}/login`, validationMiddleware(LoginUserDTO, 'body'), this.userController.login);
+    this.router.put(`${this.path}/forgot-password`, validationMiddleware(ForgotPasswordDTO, 'body'), this.userController.forgotPassword);
+    this.router.put(`${this.path}/change-password`, validationMiddleware(ChangePasswordDTO, 'body'), this.userController.changePassword);
 
     //use auth
     this.router.get(`${this.path}/generate-qr`, authMiddleware, this.userController.generateQR);

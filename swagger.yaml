@@ -107,7 +107,7 @@ paths:
           description: 'OK'
         500:
           description: 'Server Error'
-  # [PUT] generate qr for two factor authentication
+  # [PUT] enable two factor authentication
   /user/enable-2fa:
     put:
       tags:
@@ -118,7 +118,50 @@ paths:
           description: 'OK'
         500:
           description: 'Server Error'
-
+  # [PUT] Send a code 6 digests to email
+  /user/forgot-password:
+    put:
+      tags:
+        - user
+      summary: Send a code 6 digests to email
+      parameters:
+        - name: email
+          in: body
+          description: Email
+          required: true
+          type: string
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
+  # [PUT] Change password
+  /user/change-password:
+    put:
+      tags:
+        - user
+      summary: Change password with 6 digests
+      parameters:
+        - name: email
+          in: body
+          description: Email
+          required: true
+          type: string
+        - name: newPassword
+          in: body
+          description: New password
+          required: true
+          type: string
+        - name: forgotPassCode
+          in: body
+          description: 6 digests sent to email
+          required: true
+          type: string
+      responses:
+        200:
+          description: 'OK'
+        500:
+          description: 'Server Error'
   ## ExchangeRate tag
   # [GET-POST] fiat-to-crypto
   /fiat-to-crypto:

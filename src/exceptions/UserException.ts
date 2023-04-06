@@ -80,4 +80,16 @@ export class UserException extends HttpException {
 
     throw new UserException(200, response);
   }
+
+  public static invalidPassCode() {
+    const response = new ResponseDTO(this.ERROR_CODE + 14, `UserService: invalid pass code`, null);
+
+    throw new UserException(200, response);
+  }
+
+  public static overTenMinutes() {
+    const response = new ResponseDTO(this.ERROR_CODE + 15, `UserService: Over than 10 minutes`, null);
+
+    throw new UserException(200, response);
+  }
 }

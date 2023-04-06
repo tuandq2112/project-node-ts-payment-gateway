@@ -1,6 +1,7 @@
 import MerChantFactoryJson from '@/builder/MerchantFactory.json';
 import { DEFAULT_CURRENCIES, FACTORY_ADDRESS, FRONT_END_URL, OPERATOR_PRIVATE_KEY, RPC_URL } from '@/config';
 import { Enable2FaDTO } from '@/dtos/user/2fa.code.dto';
+import { ChangePasswordDTO } from '@/dtos/user/forgot.pass.dto';
 import { LoginUserDTO } from '@/dtos/user/login.user.dto';
 import { RegisterUserDTO } from '@/dtos/user/register.user.dto';
 import { SetupCurrencyDTO } from '@/dtos/user/setup.currency.dto';
@@ -222,5 +223,48 @@ class UserService {
       UserException.blockchainError(error.reason);
     }
   };
+
+  public sendForgotCodeToEmail = async (email: string): Promise<boolean> => {
+    const findUser = await this.user.findOne({ email });
+    if (!findUser) {
+      UserException.userNotFound();
+    } else {
+      const now = Date.now();
+
+      if (now <= new Date(findUser.lastTimeSendEmailForgotPassword).getTime() + 60 * 1000) {
+        UserException.resendEmailSoFast();
+      }
+      const randomString = generateRandomString(6);
+      const verifyUrl = `${FRONT_END_URL}?account=${email}&forgotCode=${randomString}`;
+
+      const sended = await this.emailService.sendResetPassword(email, verifyUrl);
+      const res = await this.user.updateOne({ _id: findUser._id }, { forgotPassCode: randomString, lastTimeSendEmailForgotPassword: now });
+
+      return !!res;
+    }
+  };
+
+  public async changePassword(changePasswordDTO: ChangePasswordDTO): Promise<boolean> {
+    const findUser = await this.user.findOne({ email: changePasswordDTO.email });
+    if (!findUser) {
+      UserException.userNotFound();
+    }
+
+    if (!changePasswordDTO.forgotPassCode || changePasswordDTO.forgotPassCode != findUser.forgotPassCode) {
+      UserException.invalidPassCode();
+    }
+    const now = Date.now();
+    if (now >= new Date(findUser.lastTimeSendEmailForgotPassword).getTime() + 60 * 10 * 1000) {
+      UserException.overTenMinutes();
+    }
+    if (changePasswordDTO.forgotPassCode == findUser.forgotPassCode) {
+      const hashedPassword = await hash(changePasswordDTO.newPassword, 10);
+
+      await this.user.updateOne({ _id: findUser._id }, { forgotPassCode: null, password: hashedPassword });
+      return true;
+    } else {
+      UserException.invalidActiveCode();
+    }
+  }
 }
 export default UserService;
